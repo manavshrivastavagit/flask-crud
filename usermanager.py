@@ -8,7 +8,7 @@ from flask import redirect
 from flask_sqlalchemy import SQLAlchemy
 
 project_dir = os.path.dirname(os.path.abspath(__file__))
-database_file = "sqlite:///{}".format(os.path.join(project_dir, "bookdatabase.db"))
+database_file = "sqlite:///{}".format(os.path.join(project_dir, "userdatabase.db"))
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = database_file
@@ -16,7 +16,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 
-class Book(db.Model):
+class User(db.Model):
     title = db.Column(db.String(80), unique=True, nullable=False, primary_key=True)
 
     def __repr__(self):
@@ -25,17 +25,17 @@ class Book(db.Model):
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-    books = None
+    users = None
     if request.form:
         try:
-            book = Book(title=request.form.get("title"))
-            db.session.add(book)
+            user = User(title=request.form.get("title"))
+            db.session.add(user)
             db.session.commit()
         except Exception as e:
-            print("Failed to add book")
+            print("Failed to add user")
             print(e)
-    books = Book.query.all()
-    return render_template("home.html", books=books)
+    users = User.query.all()
+    return render_template("home.html", users=users)
 
 
 @app.route("/update", methods=["POST"])
@@ -43,11 +43,11 @@ def update():
     try:
         newtitle = request.form.get("newtitle")
         oldtitle = request.form.get("oldtitle")
-        book = Book.query.filter_by(title=oldtitle).first()
-        book.title = newtitle
+        user = User.query.filter_by(title=oldtitle).first()
+        user.title = newtitle
         db.session.commit()
     except Exception as e:
-        print("Couldn't update book title")
+        print("Couldn't update user title")
         print(e)
     return redirect("/")
 
@@ -55,8 +55,8 @@ def update():
 @app.route("/delete", methods=["POST"])
 def delete():
     title = request.form.get("title")
-    book = Book.query.filter_by(title=title).first()
-    db.session.delete(book)
+    user = User.query.filter_by(title=title).first()
+    db.session.delete(user)
     db.session.commit()
     return redirect("/")
 
